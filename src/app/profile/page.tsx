@@ -2,11 +2,11 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Header from "@/components/Header";
 import { useEffect } from "react";
 
 export default function ProfilePage() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -23,44 +23,10 @@ export default function ProfilePage() {
     );
   }
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
-
   return (
     <main className="min-h-screen bg-black">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-xl sm:text-2xl font-bold">
-              <span className="text-white">in</span>
-              <span className="text-coral">orbit</span>
-            </Link>
-            <nav className="flex items-center gap-2 sm:gap-4">
-              <Link
-                href="/dashboard"
-                className="px-3 py-1.5 text-xs sm:text-sm hover:text-coral transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/graph"
-                className="px-3 py-1.5 text-xs sm:text-sm hover:text-coral transition-colors"
-              >
-                Constellation
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 text-xs sm:text-sm bg-gray-800 hover:bg-gray-700 rounded transition-colors"
-              >
-                Sign Out
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header variant="authenticated" currentPage="profile" />
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

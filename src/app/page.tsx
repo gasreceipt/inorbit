@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import Header from "@/components/Header";
 import { useState } from "react";
 
 export default function LandingPage() {
@@ -18,28 +19,7 @@ export default function LandingPage() {
       <AnimatedBackground />
 
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl sm:text-2xl font-bold">
-            <span className="text-white">in</span>
-            <span className="text-coral">orbit</span>
-          </Link>
-          <div className="flex items-center gap-3 sm:gap-6">
-            <Link
-              href="/graph"
-              className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
-            >
-              Explore
-            </Link>
-            <Link
-              href="/login"
-              className="px-3 py-1.5 sm:px-5 sm:py-2 bg-coral text-black text-xs sm:text-sm font-medium rounded-lg hover:bg-coral-light transition-all"
-            >
-              Join
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header variant="landing" />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 pt-24 sm:pt-20 pb-16">
