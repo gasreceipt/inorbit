@@ -130,9 +130,6 @@ export default function VScriptTerminal() {
   const parseCommand = (cmd: string): CommandOutput => {
     const trimmedCmd = cmd.trim();
 
-    // Get fresh graphData reference
-    const currentGraphData = graphData;
-
     // Help command
     if (trimmedCmd === "vS.help()" || trimmedCmd === "help") {
       return {
@@ -159,12 +156,12 @@ TIP: Press Tab for autocomplete!`,
 
     // List nodes
     if (trimmedCmd === "vS.graph.nodes()") {
-      const nodeList = currentGraphData.nodes.map(n =>
+      const nodeList = graphData.nodes.map(n =>
         `  ${n.id} - ${n.name} (${n.type}${n.discipline ? `, ${n.discipline}` : ''})`
       ).join('\n');
       return {
         command: trimmedCmd,
-        output: `Total nodes: ${currentGraphData.nodes.length}\n\n${nodeList || 'No nodes in graph'}`,
+        output: `Total nodes: ${graphData.nodes.length}\n\n${nodeList || 'No nodes in graph'}`,
         timestamp: new Date(),
         success: true,
       };
@@ -196,7 +193,7 @@ TIP: Press Tab for autocomplete!`,
   Name: ${name}
   Type: ${type}${discipline ? `\n  Discipline: ${discipline}` : ''}
 
-Total nodes: ${currentGraphData.nodes.length + 1}`,
+Run vS.graph.nodes() to see all nodes`,
         timestamp: new Date(),
         success: true,
       };
@@ -206,7 +203,7 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
     const removeMatch = trimmedCmd.match(/vS\.graph\.remove\(id:"([^"]+)"\)/);
     if (removeMatch) {
       const nodeId = removeMatch[1];
-      const node = currentGraphData.nodes.find(n => n.id === nodeId);
+      const node = graphData.nodes.find(n => n.id === nodeId);
 
       if (!node) {
         return {
@@ -220,7 +217,7 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
       removeNode(nodeId);
       return {
         command: trimmedCmd,
-        output: `✓ Removed node: ${node.name} (${nodeId})\n\nRemaining nodes: ${currentGraphData.nodes.length - 1}`,
+        output: `✓ Removed node: ${node.name} (${nodeId})\n\nRun vS.graph.nodes() to see remaining nodes`,
         timestamp: new Date(),
         success: true,
       };
@@ -230,8 +227,8 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
     const connectMatch = trimmedCmd.match(/vS\.graph\.connect\(from:"([^"]+)",\s*to:"([^"]+)"\)/);
     if (connectMatch) {
       const [, fromId, toId] = connectMatch;
-      const fromNode = currentGraphData.nodes.find(n => n.id === fromId);
-      const toNode = currentGraphData.nodes.find(n => n.id === toId);
+      const fromNode = graphData.nodes.find(n => n.id === fromId);
+      const toNode = graphData.nodes.find(n => n.id === toId);
 
       if (!fromNode || !toNode) {
         return {
@@ -267,7 +264,7 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
       resetGraph();
       return {
         command: trimmedCmd,
-        output: `✓ Graph reset to default state\n  Restored ${currentGraphData.nodes.length} nodes`,
+        output: `✓ Graph reset to default state\n  Run vS.graph.nodes() to see all nodes`,
         timestamp: new Date(),
         success: true,
       };
@@ -277,7 +274,7 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
     const focusMatch = trimmedCmd.match(/vS\.focus\(id:"([^"]+)"\)/);
     if (focusMatch) {
       const nodeId = focusMatch[1];
-      const node = currentGraphData.nodes.find(n => n.id === nodeId);
+      const node = graphData.nodes.find(n => n.id === nodeId);
 
       if (!node) {
         return {
@@ -301,7 +298,7 @@ Total nodes: ${currentGraphData.nodes.length + 1}`,
     const scanMatch = trimmedCmd.match(/vS\.scan\(discipline:"([^"]+)"\)/);
     if (scanMatch) {
       const discipline = scanMatch[1];
-      const matches = currentGraphData.nodes.filter(n => n.discipline === discipline && n.type === "user");
+      const matches = graphData.nodes.filter(n => n.discipline === discipline && n.type === "user");
 
       const matchList = matches.slice(0, 5).map(n =>
         `  ${n.id} - ${n.name}`
