@@ -17,7 +17,7 @@
   }
   html,
   body {
-    @apply h-full w-full overflow-hidden;
+    @apply w-full;
   }
 }
 
