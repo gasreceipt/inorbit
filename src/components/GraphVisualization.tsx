@@ -95,12 +95,43 @@ export default function GraphVisualization() {
     }
   };
 
+  // Get node color based on type and state
+  const getNodeColor = (node: any) => {
+    if (highlightNodes.size > 0 && !highlightNodes.has(node.id)) {
+      return "#222222"; // Dim non-highlighted nodes
+    }
+    return node.color || "#666";
+  };
+
+  // Get node size based on type
+  const getNodeSize = (node: any) => {
+    if (node.type === "project") return 8;
+    return 6;
+  };
+
+  // Get link color based on connection type and state
+  const getLinkColor = (link: any) => {
+    if (highlightLinks.has(link)) {
+      return "#FF6B6B"; // Bright coral for highlighted
+    }
+    if (link.type === "collaboration") {
+      return "#4ECDC4"; // Turquoise for collaborations
+    }
+    return "#555555"; // Gray for regular connections
+  };
+
+  // Get link width based on state
+  const getLinkWidth = (link: any) => {
+    if (highlightLinks.has(link)) return 3;
+    return 1.5;
+  };
+
   return (
     <div ref={containerRef} className="relative w-full h-full bg-black">
       {/* Graph Info Overlay */}
-      <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 bg-gray-950/80 backdrop-blur-sm border border-gray-800 rounded-lg p-2 sm:p-4">
+      <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 bg-gray-950/90 backdrop-blur-sm border border-gray-800 rounded-lg p-2 sm:p-4">
         <h3 className="text-xs sm:text-sm font-semibold text-coral mb-1 sm:mb-2">
-          Constellation ({graphData.nodes.length} nodes)
+          Constellation
         </h3>
         <div className="text-[10px] sm:text-xs space-y-0.5 sm:space-y-1">
           <div className="flex items-center gap-1 sm:gap-2">
@@ -123,6 +154,9 @@ export default function GraphVisualization() {
             <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#C7B3E5]"></div>
             <span>Writing</span>
           </div>
+          <div className="border-t border-gray-700 pt-1 mt-1">
+            <span className="text-gray-500">{graphData.nodes.length} nodes • {graphData.links.length} links</span>
+          </div>
         </div>
       </div>
 
@@ -140,6 +174,9 @@ export default function GraphVisualization() {
                 "Project"
               )}
             </div>
+            <div className="text-[10px] text-gray-500 mt-1">
+              ID: {hoverNode.id}
+            </div>
           </div>
         </div>
       )}
@@ -151,14 +188,16 @@ export default function GraphVisualization() {
         width={dimensions.width}
         height={dimensions.height}
         nodeLabel={(node: any) => node.name}
-        nodeColor={(node: any) => node.color || "#666"}
-        nodeRelSize={6}
-        nodeOpacity={0.9}
-        linkColor={(link: any) =>
-          highlightLinks.has(link) ? "#FF6B6B" : "#333333"
-        }
-        linkWidth={(link: any) => (highlightLinks.has(link) ? 2 : 1)}
-        linkOpacity={0.6}
+        nodeColor={getNodeColor}
+        nodeRelSize={getNodeSize}
+        nodeOpacity={0.95}
+        nodeResolution={16}
+        linkColor={getLinkColor}
+        linkWidth={getLinkWidth}
+        linkOpacity={0.8}
+        linkDirectionalParticles={2}
+        linkDirectionalParticleWidth={2}
+        linkDirectionalParticleSpeed={0.005}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
         backgroundColor="#000000"
@@ -167,6 +206,8 @@ export default function GraphVisualization() {
         enableNodeDrag={true}
         enableNavigationControls={true}
         d3VelocityDecay={0.3}
+        warmupTicks={100}
+        cooldownTicks={0}
       />
 
       {/* Instructions */}

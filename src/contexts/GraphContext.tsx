@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { GraphData, GraphNode, GraphLink } from "@/types/graph";
 import { dummyGraphData } from "@/lib/dummyData";
 
@@ -13,15 +13,68 @@ interface GraphContextType {
   removeNode: (nodeId: string) => void;
   addLink: (link: GraphLink) => void;
   removeLink: (sourceId: string, targetId: string) => void;
+  updateNode: (nodeId: string, updates: Partial<GraphNode>) => void;
   clearGraph: () => void;
   resetGraph: () => void;
+  saveToLocalStorage: () => void;
+  loadFromLocalStorage: () => void;
 }
 
 const GraphContext = createContext<GraphContextType | undefined>(undefined);
 
+const STORAGE_KEY = "inorbit_graph_data";
+
 export function GraphProvider({ children }: { children: ReactNode }) {
   const [graphData, setGraphData] = useState<GraphData>(dummyGraphData);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setGraphData(parsed);
+        } catch (e) {
+          console.error("Failed to parse stored graph data", e);
+        }
+      }
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Save to localStorage whenever graphData changes (after initialization)
+  useEffect(() => {
+    if (isInitialized && typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(graphData));
+      } catch (e) {
+        console.error("Failed to save graph data", e);
+      }
+    }
+  }, [graphData, isInitialized]);
+
+  const saveToLocalStorage = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(graphData));
+    }
+  };
+
+  const loadFromLocalStorage = () => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setGraphData(parsed);
+        } catch (e) {
+          console.error("Failed to parse stored graph data", e);
+        }
+      }
+    }
+  };
 
   const addNode = (node: GraphNode) => {
     setGraphData((prev) => ({
@@ -34,7 +87,11 @@ export function GraphProvider({ children }: { children: ReactNode }) {
     setGraphData((prev) => ({
       nodes: prev.nodes.filter((n) => n.id !== nodeId),
       links: prev.links.filter(
-        (l) => l.source !== nodeId && l.target !== nodeId
+        (l) => {
+          const sourceId = typeof l.source === 'object' ? (l.source as any).id : l.source;
+          const targetId = typeof l.target === 'object' ? (l.target as any).id : l.target;
+          return sourceId !== nodeId && targetId !== nodeId;
+        }
       ),
     }));
   };
@@ -50,11 +107,23 @@ export function GraphProvider({ children }: { children: ReactNode }) {
     setGraphData((prev) => ({
       ...prev,
       links: prev.links.filter(
-        (l) =>
-          !(
-            (l.source === sourceId && l.target === targetId) ||
-            (l.source === targetId && l.target === sourceId)
-          )
+        (l) => {
+          const linkSourceId = typeof l.source === 'object' ? (l.source as any).id : l.source;
+          const linkTargetId = typeof l.target === 'object' ? (l.target as any).id : l.target;
+          return !(
+            (linkSourceId === sourceId && linkTargetId === targetId) ||
+            (linkSourceId === targetId && linkTargetId === sourceId)
+          );
+        }
+      ),
+    }));
+  };
+
+  const updateNode = (nodeId: string, updates: Partial<GraphNode>) => {
+    setGraphData((prev) => ({
+      ...prev,
+      nodes: prev.nodes.map((n) =>
+        n.id === nodeId ? { ...n, ...updates } : n
       ),
     }));
   };
@@ -65,6 +134,10 @@ export function GraphProvider({ children }: { children: ReactNode }) {
 
   const resetGraph = () => {
     setGraphData(dummyGraphData);
+    // Also clear localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dummyGraphData));
+    }
   };
 
   return (
@@ -78,8 +151,11 @@ export function GraphProvider({ children }: { children: ReactNode }) {
         removeNode,
         addLink,
         removeLink,
+        updateNode,
         clearGraph,
         resetGraph,
+        saveToLocalStorage,
+        loadFromLocalStorage,
       }}
     >
       {children}
