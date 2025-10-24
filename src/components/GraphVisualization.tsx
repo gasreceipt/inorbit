@@ -16,7 +16,7 @@ const ForceGraph3D = dynamic(() => import("react-force-graph-3d"), {
 });
 
 export default function GraphVisualization() {
-  const graphRef = useRef<any>();
+  const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { graphData, focusedNode } = useGraph();
   const [highlightNodes, setHighlightNodes] = useState(new Set());
@@ -105,8 +105,8 @@ export default function GraphVisualization() {
 
   // Get node size based on type
   const getNodeSize = (node: any) => {
-    if (node.type === "project") return 8;
-    return 6;
+    if (node.type === "project") return 10;
+    return 7;
   };
 
   // Get link color based on connection type and state
@@ -117,13 +117,13 @@ export default function GraphVisualization() {
     if (link.type === "collaboration") {
       return "#4ECDC4"; // Turquoise for collaborations
     }
-    return "#555555"; // Gray for regular connections
+    return "#444444"; // Darker gray for regular connections
   };
 
   // Get link width based on state
   const getLinkWidth = (link: any) => {
-    if (highlightLinks.has(link)) return 3;
-    return 1.5;
+    if (highlightLinks.has(link)) return 2.5;
+    return 1;
   };
 
   return (
@@ -189,15 +189,15 @@ export default function GraphVisualization() {
         height={dimensions.height}
         nodeLabel={(node: any) => node.name}
         nodeColor={getNodeColor}
-        nodeRelSize={getNodeSize}
-        nodeOpacity={0.95}
-        nodeResolution={16}
+        nodeVal={getNodeSize}
+        nodeOpacity={1}
+        nodeResolution={20}
         linkColor={getLinkColor}
         linkWidth={getLinkWidth}
-        linkOpacity={0.8}
-        linkDirectionalParticles={2}
-        linkDirectionalParticleWidth={2}
-        linkDirectionalParticleSpeed={0.005}
+        linkOpacity={0.6}
+        linkDirectionalParticles={1}
+        linkDirectionalParticleWidth={1.5}
+        linkDirectionalParticleSpeed={0.003}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
         backgroundColor="#000000"

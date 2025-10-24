@@ -16,12 +16,18 @@ export default function GraphPage() {
             <span className="text-coral">orbit</span>
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-4">
-            <button className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm hover:text-coral transition-colors">
+            <Link
+              href="/login"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm hover:text-coral transition-colors"
+            >
               Sign In
-            </button>
-            <button className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-coral text-black rounded hover:bg-coral-light transition-colors">
+            </Link>
+            <Link
+              href="/login"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-coral text-black rounded hover:bg-coral-light transition-colors"
+            >
               Get Started
-            </button>
+            </Link>
           </div>
         </header>
 

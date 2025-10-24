@@ -31,9 +31,12 @@ export default function LandingPage() {
             >
               Explore
             </Link>
-            <button className="px-3 py-1.5 sm:px-5 sm:py-2 bg-coral text-black text-xs sm:text-sm font-medium rounded-lg hover:bg-coral-light transition-all">
+            <Link
+              href="/login"
+              className="px-3 py-1.5 sm:px-5 sm:py-2 bg-coral text-black text-xs sm:text-sm font-medium rounded-lg hover:bg-coral-light transition-all"
+            >
               Join
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
