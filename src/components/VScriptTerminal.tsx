@@ -13,7 +13,15 @@ interface CommandOutput {
 }
 
 export default function VScriptTerminal() {
-  const { graphData, addNode, removeNode, addLink, clearGraph, resetGraph, setFocusedNode } = useGraph();
+  const graphContext = useGraph();
+  const { graphData, addNode, removeNode, addLink, clearGraph, resetGraph, setFocusedNode } = graphContext;
+
+  // Use ref to always have latest graphData
+  const graphDataRef = useRef(graphData);
+  useEffect(() => {
+    graphDataRef.current = graphData;
+  }, [graphData]);
+
   const [history, setHistory] = useState<CommandOutput[]>([
     {
       command: "vS.init()",
@@ -156,12 +164,13 @@ TIP: Press Tab for autocomplete!`,
 
     // List nodes
     if (trimmedCmd === "vS.graph.nodes()") {
-      const nodeList = graphData.nodes.map(n =>
+      const currentData = graphDataRef.current;
+      const nodeList = currentData.nodes.map(n =>
         `  ${n.id} - ${n.name} (${n.type}${n.discipline ? `, ${n.discipline}` : ''})`
       ).join('\n');
       return {
         command: trimmedCmd,
-        output: `Total nodes: ${graphData.nodes.length}\n\n${nodeList || 'No nodes in graph'}`,
+        output: `Total nodes: ${currentData.nodes.length}\n\n${nodeList || 'No nodes in graph'}`,
         timestamp: new Date(),
         success: true,
       };
@@ -203,7 +212,7 @@ Run vS.graph.nodes() to see all nodes`,
     const removeMatch = trimmedCmd.match(/vS\.graph\.remove\(id:"([^"]+)"\)/);
     if (removeMatch) {
       const nodeId = removeMatch[1];
-      const node = graphData.nodes.find(n => n.id === nodeId);
+      const node = graphDataRef.current.nodes.find(n => n.id === nodeId);
 
       if (!node) {
         return {
@@ -227,8 +236,8 @@ Run vS.graph.nodes() to see all nodes`,
     const connectMatch = trimmedCmd.match(/vS\.graph\.connect\(from:"([^"]+)",\s*to:"([^"]+)"\)/);
     if (connectMatch) {
       const [, fromId, toId] = connectMatch;
-      const fromNode = graphData.nodes.find(n => n.id === fromId);
-      const toNode = graphData.nodes.find(n => n.id === toId);
+      const fromNode = graphDataRef.current.nodes.find(n => n.id === fromId);
+      const toNode = graphDataRef.current.nodes.find(n => n.id === toId);
 
       if (!fromNode || !toNode) {
         return {
@@ -274,7 +283,7 @@ Run vS.graph.nodes() to see all nodes`,
     const focusMatch = trimmedCmd.match(/vS\.focus\(id:"([^"]+)"\)/);
     if (focusMatch) {
       const nodeId = focusMatch[1];
-      const node = graphData.nodes.find(n => n.id === nodeId);
+      const node = graphDataRef.current.nodes.find(n => n.id === nodeId);
 
       if (!node) {
         return {
@@ -298,7 +307,7 @@ Run vS.graph.nodes() to see all nodes`,
     const scanMatch = trimmedCmd.match(/vS\.scan\(discipline:"([^"]+)"\)/);
     if (scanMatch) {
       const discipline = scanMatch[1];
-      const matches = graphData.nodes.filter(n => n.discipline === discipline && n.type === "user");
+      const matches = graphDataRef.current.nodes.filter(n => n.discipline === discipline && n.type === "user");
 
       const matchList = matches.slice(0, 5).map(n =>
         `  ${n.id} - ${n.name}`
